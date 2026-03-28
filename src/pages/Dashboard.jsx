@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:5000";
+const API = "https://sms-backend-eqqt.onrender.com";
+const WS_API = "ws://localhost:5000";
 
 export default function Dashboard() {
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState("");
   const [contacts, setContacts] = useState([]);
   const [contactSearch, setContactSearch] = useState("");
+  const [backendOk, setBackendOk] = useState(null); // null=checking, true=ok, false=error
 
   // Selected recipients — array of { name, phone }
   const [recipients, setRecipients] = useState([]);
@@ -32,9 +34,12 @@ export default function Dashboard() {
   const fetchDevices = async () => {
     try {
       const res = await fetch(`${API}/devices`);
-      setDevices(await res.json());
+      const data = await res.json();
+      setDevices(data);
+      setBackendOk(true);
     } catch {
       setDevices([]);
+      setBackendOk(false);
     }
   };
 
@@ -143,10 +148,12 @@ export default function Dashboard() {
           <span style={s.logoText}>BulkSMS</span>
         </div>
         <div style={s.headerRight}>
-          {devices.length > 0 ? (
-            <span style={s.badge}>🟢 {devices.length} device{devices.length > 1 ? "s" : ""} online</span>
+          {backendOk === false ? (
+            <span style={{ ...s.badge, background: "#fee2e2", color: "#ef4444" }}>⚠️ Backend offline — run: node src/server.js</span>
+          ) : devices.filter(d => d.online).length > 0 ? (
+            <span style={s.badge}>🟢 {devices.filter(d => d.online).length} device{devices.filter(d => d.online).length > 1 ? "s" : ""} online</span>
           ) : (
-            <span style={{ ...s.badge, background: "#fee2e2", color: "#ef4444" }}>🔴 No device</span>
+            <span style={{ ...s.badge, background: "#fef9c3", color: "#b45309" }}>📱 Backend OK — Open app on phone</span>
           )}
         </div>
       </div>
@@ -187,14 +194,35 @@ export default function Dashboard() {
                   <div>
                     <div style={s.deviceName}>{d.name}</div>
                     <div style={s.devicePhone}>{d.phoneNumber}</div>
+                    <div style={s.deviceMeta}>
+                      <span>{d.network === "WiFi" ? "📶" : d.network === "Mobile Data" ? "📡" : "❌"} {d.network}</span>
+                      <span style={{ marginLeft: 8 }}>
+                        {d.charging ? "⚡" : "🔋"} {d.battery >= 0 ? `${d.battery}%` : "N/A"}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <span style={s.onlineDot}>●</span>
+                <span style={d.online ? s.onlineDot : s.offlineDot}>{d.online ? "●" : "○"}</span>
               </div>
             ))}
 
             {devices.length === 0 && (
-              <p style={s.muted}>No devices connected. Open mobile app.</p>
+              <div style={s.noDeviceBox}>
+                {backendOk === false ? (
+                  <>
+                    <p style={{ ...s.muted, color: "#ef4444", fontWeight: "600" }}>⚠️ Backend chal nahi raha</p>
+                    <p style={s.muted}>Terminal mein run karo:</p>
+                    <code style={s.code}>cd sms-backend &amp;&amp; node src/server.js</code>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ ...s.muted, fontWeight: "600" }}>📱 Phone connect nahi hai</p>
+                    <p style={s.muted}>1. Phone aur PC same WiFi pe hone chahiye</p>
+                    <p style={s.muted}>2. App mein IP set karo: <code style={s.inlineCode}>192.168.1.40</code></p>
+                    <p style={s.muted}>3. App open karo — auto-connect hoga</p>
+                  </>
+                )}
+              </div>
             )}
           </div>
 
@@ -436,7 +464,9 @@ const s = {
   deviceIcon: { fontSize: 22 },
   deviceName: { fontSize: 13, fontWeight: "600", color: "#1e293b" },
   devicePhone: { fontSize: 12, color: "#6366f1" },
+  deviceMeta: { fontSize: 11, color: "#94a3b8", marginTop: 2 },
   onlineDot: { color: "#22c55e", fontSize: 18 },
+  offlineDot: { color: "#94a3b8", fontSize: 18 },
 
   // Recipients
   rowBetween: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
@@ -532,6 +562,9 @@ const s = {
   logPhone: { fontSize: 12, color: "#64748b" },
   logTime: { fontSize: 11, color: "#94a3b8" },
 
+  noDeviceBox: { padding: "10px 4px", display: "flex", flexDirection: "column", gap: 6 },
+  code: { background: "#f1f5f9", padding: "6px 10px", borderRadius: 6, fontSize: 12, fontFamily: "monospace", color: "#1e293b", display: "block", marginTop: 4 },
+  inlineCode: { background: "#eef2ff", padding: "1px 6px", borderRadius: 4, fontSize: 12, fontFamily: "monospace", color: "#4338ca" },
   // Common
   muted: { color: "#94a3b8", fontSize: 13 },
   linkBtn: { background: "none", border: "none", color: "#6366f1", fontSize: 13, cursor: "pointer", fontWeight: "600" },

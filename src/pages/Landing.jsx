@@ -9,7 +9,7 @@ const [devices, setDevices] = useState([]);
 
   // Fetch devices
   const fetchDevices = async () => {
-    const res = await axios.get("http://localhost:5000/devices");
+    const res = await axios.get("https://sms-backend-eqqt.onrender.com/devices");
     setDevices(res.data);
   };
 
@@ -20,7 +20,7 @@ const [devices, setDevices] = useState([]);
   }, []);
 
   const sendMessage = async () => {
-    await axios.post("http://localhost:5000/send", {
+    await axios.post("https://sms-backend-eqqt.onrender.com/send", {
       deviceId,
       phone,
       message,
