@@ -15,7 +15,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+          {/* <Route path="/signup" element={<Signup />} /> */}
           <Route path="/dashboard" element={<Guard><Dashboard /></Guard>} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
