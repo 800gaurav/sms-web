@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// const API = "https://api.sms.genzteck.com";
 const API = "http://10.54.46.126:5000";
-
 export default function Signup() {
   const { login } = useAuth();
   const navigate = useNavigate();

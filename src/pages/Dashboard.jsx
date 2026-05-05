@@ -3,7 +3,9 @@ import { useAuth, getToken } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API = "http://10.54.46.126:5000";
+const API = "http://localhost:5000";
+// const API = "https://api.sms.genzteck.com";
+
 
 // --- Helper Components for Cleaner JSX ---
 const TabButton = ({ active, onClick, icon, label, count }) => (
