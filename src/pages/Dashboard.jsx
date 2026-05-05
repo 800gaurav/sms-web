@@ -3,8 +3,8 @@ import { useAuth, getToken } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API = "http://localhost:5000";
-// const API = "https://api.sms.genzteck.com";
+// const API = "http://localhost:5000";
+const API = "https://api.sms.genzteck.com";
 
 
 // --- Helper Components for Cleaner JSX ---
@@ -269,8 +269,8 @@ export default function Dashboard() {
       return;
     }
     const device = devices.find(d => d.id === selectedDevice);
-    if (!device?.online) {
-      alert("❌ Selected device is offline. Please choose an online device.");
+    if (!device?.online && !device?.hasFcm) {
+      alert("❌ Selected device is offline and has no FCM token. Please open the app once on that device.");
       return;
     }
     setSending(true);
@@ -436,7 +436,7 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start mb-4">
                       <div className="text-3xl">📱</div>
                       <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${d.online ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}`}>
-                        {d.online ? "● Online" : "○ Offline"}
+                        {d.online ? "● Online" : d.hasFcm ? "● FCM Ready" : "○ Offline"}
                       </div>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900">{d.name}</h3>
@@ -469,7 +469,7 @@ export default function Dashboard() {
                   <select className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm" value={selectedDevice} onChange={e => setSelectedDevice(e.target.value)}>
                     <option value="">-- Choose Device --</option>
                     {devices.map(d => (
-                      <option key={d.id} value={d.id}>{d.online ? "🟢" : "🔴"} {d.name} ({d.phoneNumber})</option>
+                      <option key={d.id} value={d.id}>{d.online ? "🟢" : d.hasFcm ? "🟡" : "🔴"} {d.name} ({d.phoneNumber})</option>
                     ))}
                   </select>
                 </div>
