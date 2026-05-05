@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API = "https://api.sms.genzteck.com";
-// const API = "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL;
 
 export default function Login() {
   const { login } = useAuth();
@@ -14,39 +13,18 @@ export default function Login() {
 
   const submit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-    
-    console.log('🔐 Attempting login...', form.email);
-    
+    setError(""); setLoading(true);
     try {
       const res = await fetch(`${API}/auth/login`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      
-      console.log('📡 Response status:', res.status);
-      
-      if (!res.ok) {
-        const data = await res.json();
-        console.log('❌ Login failed:', data);
-        setError(data.error || "Login failed");
-        setLoading(false);
-        return;
-      }
-      
       const data = await res.json();
-      console.log('✅ Login successful:', data);
-      
+      if (!res.ok) return setError(data.error);
       login(data.user, data.token);
       navigate("/dashboard");
-    } catch (err) {
-      console.error('❌ Network error:', err);
-      setError("Server se connect nahi ho pa raha. Check console for details.");
+    } catch {
+      setError("Server se connect nahi ho pa raha");
     } finally {
       setLoading(false);
     }
@@ -57,16 +35,7 @@ export default function Login() {
       <div style={s.card}>
         <div style={s.logo}>💬</div>
         <h1 style={s.title}>Welcome back</h1>
-        <p style={s.sub}>Sign in to your BulkSMS account</p>
-        
-        {/* Default Credentials Info */}
-        <div style={s.infoBox}>
-          <div style={s.infoTitle}>🔑 Default Login</div>
-          <div style={s.infoText}>
-            <strong>Email:</strong> admin@bulksms.com<br/>
-            <strong>Password:</strong> admin123
-          </div>
-        </div>
+        {/* <p style={s.sub}>Sign in to your BulkSMS account</p> */}
 
         {error && <div style={s.error}>{error}</div>}
 
@@ -98,17 +67,7 @@ const s = {
   card: { background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: 20, padding: "48px 40px", width: "100%", maxWidth: 420, boxShadow: "0 10px 40px rgba(0,0,0,0.08)" },
   logo: { fontSize: 40, textAlign: "center", marginBottom: 16 },
   title: { fontSize: 26, fontWeight: "800", color: "#111827", textAlign: "center", margin: "0 0 8px" },
-  sub: { color: "#6b7280", textAlign: "center", fontSize: 14, marginBottom: 20 },
-  infoBox: { 
-    background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)", 
-    border: "1px solid #93c5fd", 
-    borderRadius: 10, 
-    padding: "14px 16px", 
-    marginBottom: 20,
-    textAlign: "center"
-  },
-  infoTitle: { fontSize: 13, fontWeight: "700", color: "#1e40af", marginBottom: 8 },
-  infoText: { fontSize: 12, color: "#1e3a8a", lineHeight: 1.6 },
+  sub: { color: "#6b7280", textAlign: "center", fontSize: 14, marginBottom: 32 },
   error: { background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626", borderRadius: 8, padding: "10px 14px", fontSize: 13, marginBottom: 16 },
   label: { display: "block", fontSize: 13, fontWeight: "600", color: "#374151", marginBottom: 6 },
   input: { width: "100%", padding: "12px 14px", background: "#ffffff", border: "1px solid #d1d5db", borderRadius: 10, color: "#111827", fontSize: 14, marginBottom: 16, boxSizing: "border-box", outline: "none" },

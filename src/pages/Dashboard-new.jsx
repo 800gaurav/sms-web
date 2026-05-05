@@ -3,7 +3,7 @@ import { useAuth, getToken } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API = "https://sms-backend-omega.vercel.app";
+const API = import.meta.env.VITE_API_URL;
 
 // Loading Spinner Component
 const LoadingSpinner = () => (
